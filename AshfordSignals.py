@@ -11,6 +11,13 @@ import math
 from IPython.display import Audio
 
 class Signal:
+    def __add__(self, other):
+        """Adds two signals"""
+        if(other == 0):
+            return self
+        else:
+            return SumSignal(self, other)
+    
     def make_wave(self, duration=1, start=0, framerate=11025):
         """Makes a Wave object.
 
@@ -30,6 +37,22 @@ class Signal:
             duration = self.period * period_length
         wave = self.make_wave(duration)
         wave.plot()
+    
+    def make_audio(self, duration = 3):
+        wave = self.make_wave(duration)
+        wave.make_audio()
+
+class SumSignal(Signal):
+    def __init__(self, *args):
+        self.signals = args
+    
+    @property
+    def period(self):
+        return max(signal.period for signal in self.signals)
+    
+    def evaluate(self, ts):
+        ts = np.asarray(ts)
+        return sum(signal.evaluate(ts) for signal in self.signals)
 
 class Sinusoid(Signal):
     """Represents sinusoidal signal"""
